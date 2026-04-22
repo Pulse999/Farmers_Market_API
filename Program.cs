@@ -1,7 +1,8 @@
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services
-builder.Services.AddControllers();
+// ✅ Enable MVC (Views) + API
+builder.Services.AddControllersWithViews();
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -16,8 +17,19 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseStaticFiles(); // ✅ Required for views
+
+app.UseRouting();
+
 app.UseAuthorization();
 
+// ✅ This enables homepage "/"
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}"
+);
+
+// ✅ Keep API working
 app.MapControllers();
 
 app.Run();
