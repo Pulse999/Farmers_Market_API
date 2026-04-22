@@ -1,6 +1,7 @@
 using Farmers_Market_API.Models;
 using Farmers_Market_API.Enums;
 using Microsoft.AspNetCore.Mvc;
+using Farmers_Market_API.Repositories;
 
 namespace Farmers_Market_API.Controllers
 {
@@ -8,56 +9,108 @@ namespace Farmers_Market_API.Controllers
     [Route("api/[controller]")]
     public class FarmerController : ControllerBase
     {
-        private static List<Farmer> farmers = new List<Farmer>
-        {
-            new Farmer { FarmerId = 1, FullName = "Kobus", Email = "kobus@example.com", PhoneNumber = "123", Location = "Pretoria", Province = Province.Gauteng, Rating = 4.5, IsVerified = true },
-            new Farmer { FarmerId = 2, FullName = "Tyrique", Email = "tyrique@example.com", PhoneNumber = "456", Location = "Joburg", Province = Province.Gauteng, Rating = 4.0, IsVerified = true }
-        };
+        private FarmerRepository _repository = new FarmerRepository();
 
+        // ✅ GET ALL
         [HttpGet]
         public ActionResult<List<Farmer>> GetAll()
         {
-            return Ok(farmers);
+            try
+            {
+                return Ok(_repository.GetAll());
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = "Error retrieving farmers", details = ex.Message });
+            }
         }
 
-        [HttpPost]
-        public ActionResult Add(Farmer farmer)
+        // ✅ GET BY ID (IMPORTANT ADD)
+        [HttpGet("{id}")]
+        public ActionResult<Farmer> GetById(int id)
         {
-            farmer.FarmerId = farmers.Count + 1;
-            farmers.Add(farmer);
-
-            return Ok(farmer);
-        }
-
-        [HttpDelete("{id}")]
-        public ActionResult Delete(int id)
-        {
-            var farmer = farmers.FirstOrDefault(f => f.FarmerId == id);
+            var farmer = _repository.GetFarmerById(id);
 
             if (farmer == null)
                 return NotFound("Farmer not found");
 
-            farmers.Remove(farmer);
-
-            return Ok("Deleted successfully");
+            return Ok(farmer);
         }
 
+        // ✅ GET BY EMAIL (you already built this in repo 👌)
+        [HttpGet("email/{email}")]
+        public ActionResult<Farmer> GetByEmail(string email)
+        {
+            var farmer = _repository.GetFarmerByEmail(email);
+
+            if (farmer == null)
+                return NotFound("Farmer not found");
+
+            return Ok(farmer);
+        }
+
+        // ✅ CREATE (IMPROVED)
+        [HttpPost]
+        public ActionResult<Farmer> Add(Farmer farmer)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                    return BadRequest(ModelState);
+
+                var createdFarmer = _repository.Create(farmer);
+
+                return CreatedAtAction(
+                    nameof(GetById),
+                    new { id = createdFarmer.FarmerId },
+                    createdFarmer
+                );
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = "Error creating farmer", details = ex.Message });
+            }
+        }
+
+        // ✅ UPDATE
         [HttpPut("{id}")]
         public ActionResult Update(int id, Farmer updatedFarmer)
         {
-            var farmer = farmers.FirstOrDefault(f => f.FarmerId == id);
+            try
+            {
+                if (!ModelState.IsValid)
+                    return BadRequest(ModelState);
 
-            if (farmer == null)
-                return NotFound("Farmer not found");
+                var farmer = _repository.UpdateFarmer(id, updatedFarmer);
 
-            farmer.FullName = updatedFarmer.FullName;
-            farmer.Email = updatedFarmer.Email;
-            farmer.PhoneNumber = updatedFarmer.PhoneNumber;
-            farmer.Location = updatedFarmer.Location;
-            farmer.Province = updatedFarmer.Province;
-            farmer.IsVerified = updatedFarmer.IsVerified;
+                if (farmer == null)
+                    return NotFound("Farmer not found");
 
-            return Ok(farmer);
+                return Ok(farmer);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = "Error updating farmer", details = ex.Message });
+            }
+        }
+
+        // ✅ DELETE
+        [HttpDelete("{id}")]
+        public ActionResult Delete(int id)
+        {
+            try
+            {
+                var success = _repository.Delete(id);
+
+                if (!success)
+                    return NotFound("Farmer not found");
+
+                return Ok("Deleted successfully");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = "Error deleting farmer", details = ex.Message });
+            }
         }
     }
 }
