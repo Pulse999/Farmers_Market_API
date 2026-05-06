@@ -1,25 +1,20 @@
-using Farmers_Market_API.Enums;
-
 namespace Farmers_Market_API.Models
 {
-    public class Farmer
+    public class Farmer : Person
     {
         public int FarmerId { get; set; }
 
-        public string FullName { get; set; } = string.Empty;
+        public string FarmName { get; set; } = string.Empty;
 
-        public string Email { get; set; } = string.Empty;
+        public FarmerLocation Location { get; set; }
 
-        public string PhoneNumber { get; set; } = string.Empty;
+        public double Rating { get; set; }
 
-        public string Location { get; set; } = string.Empty;
+        public bool IsVerified { get; set; }
 
-        public Province Province { get; set; }
-
-        public double Rating { get; set; } = 0.0;
-
-        public bool IsVerified { get; set; } = false;
-
-        public Farmer() { }
+        public override string GetContactInfo()
+        {
+            return $"{FullName} from {FarmName} | Email: {Email} | Phone: {PhoneNumber}";
+        }
     }
 }

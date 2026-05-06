@@ -1,16 +1,36 @@
 ﻿using System.Linq;
 using Farmers_Market_API.Enums;
 using Farmers_Market_API.Models;
+using Farmers_Market_API.Interfaces;
 
 namespace Farmers_Market_API.Repositories
 {
-    public class FarmerRepository
+    public class FarmerRepository : IRepository<Farmer>
     {
         private static List<Farmer> farmers = new List<Farmer>
-        {
-            new Farmer { FarmerId = 1, FullName = "Kobus", Email = "kobus@example.com", PhoneNumber = "123", Location = "Pretoria", Province = Province.Gauteng, Rating = 4.5, IsVerified = true },
-            new Farmer { FarmerId = 2, FullName = "Tyrique", Email = "tyrique@example.com", PhoneNumber = "456", Location = "Joburg", Province = Province.Gauteng, Rating = 4.0, IsVerified = true }
-        };
+{
+    new Farmer
+    {
+        FarmerId = 1,
+        FullName = "Kobus",
+        Email = "kobus@example.com",
+        PhoneNumber = "123",
+        Location = new FarmerLocation("Kobus Farms", "Pretoria", Province.Gauteng),
+        Rating = 4.5,
+        IsVerified = true
+    },
+
+    new Farmer
+    {
+        FarmerId = 2,
+        FullName = "Tyrique",
+        Email = "tyrique@example.com",
+        PhoneNumber = "456",
+        Location = new FarmerLocation("Tyrique Farms", "Johannesburg", Province.Gauteng),
+        Rating = 4.0,
+        IsVerified = true
+    }
+};
 
         // Get all farmers
         public List<Farmer> GetAll()
@@ -54,7 +74,6 @@ namespace Farmers_Market_API.Repositories
             farmer.Email = updatedFarmer.Email;
             farmer.PhoneNumber = updatedFarmer.PhoneNumber;
             farmer.Location = updatedFarmer.Location;
-            farmer.Province = updatedFarmer.Province;
             farmer.Rating = updatedFarmer.Rating;
             farmer.IsVerified = updatedFarmer.IsVerified;
 
@@ -71,6 +90,16 @@ namespace Farmers_Market_API.Repositories
 
             farmers.Remove(farmer);
             return true;
+        }
+
+        public void Add(Farmer item)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Farmer? GetById(int id)
+        {
+            throw new NotImplementedException();
         }
     }
 }

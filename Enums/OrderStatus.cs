@@ -4,6 +4,7 @@ namespace Farmers_Market_API.Enums
     {
         Confirmed,
         Collected, 
-        Cancelled 
+        Cancelled,
+        Pending
     }
 }

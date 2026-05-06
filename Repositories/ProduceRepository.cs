@@ -1,10 +1,11 @@
 ﻿using Farmers_Market_API.Models;
 using Farmers_Market_API.Enums;
 using Farmers_Market_API.Exceptions;
+using Farmers_Market_API.Interfaces;
 
 namespace Farmers_Market_API.Repositories
 {
-    public class ProduceRepository
+    public class ProduceRepository : IRepository<ProduceListing>
     {
         private readonly List<ProduceListing> _listings = new();
 
@@ -37,6 +38,11 @@ namespace Farmers_Market_API.Repositories
         {
             listing.ListingId = _listings.Count + 1;
             _listings.Add(listing);
+        }
+
+        public bool Delete(int id)
+        {
+            throw new NotImplementedException();
         }
     }
 }

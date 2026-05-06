@@ -117,39 +117,49 @@ namespace Farmers_Market_API.Controllers
         [HttpPost]
         public ActionResult<ProduceListingResponseDto> Add([FromBody] CreateProduceListingDto dto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            var listing = new ProduceListing
+            try
             {
-                FarmerId = dto.FarmerId,
-                ProductName = dto.ProductName,
-                Category = dto.Category,
-                PricePerKg = dto.PricePerKg,
-                QuantityKg = dto.QuantityKg,
-                HarvestDate = dto.HarvestDate,
-                Description = dto.Description,
-                DateListed = DateTime.Now,
-                IsAvailable = true
-            };
+                if (string.IsNullOrWhiteSpace(dto.ProductName))
+                    return BadRequest("ProductName cannot be empty.");
 
-            _repo.Add(listing);
+                if (dto.PricePerKg <= 0)
+                    return BadRequest("PricePerKg must be greater than 0.");
 
-            var response = new ProduceListingResponseDto
+                var listing = new ProduceListing
+                {
+                    FarmerId = dto.FarmerId,
+                    ProductName = dto.ProductName,
+                    Category = dto.Category,
+                    PricePerKg = dto.PricePerKg,
+                    QuantityKg = dto.QuantityKg,
+                    HarvestDate = dto.HarvestDate,
+                    Description = dto.Description,
+                    DateListed = DateTime.Now,
+                    IsAvailable = true
+                };
+
+                _repo.Add(listing);
+
+                var response = new ProduceListingResponseDto
+                {
+                    ListingId = listing.ListingId,
+                    FarmerId = listing.FarmerId,
+                    ProductName = listing.ProductName,
+                    Category = listing.Category,
+                    PricePerKg = listing.PricePerKg,
+                    QuantityKg = listing.QuantityKg,
+                    IsAvailable = listing.IsAvailable,
+                    HarvestDate = listing.HarvestDate,
+                    DateListed = listing.DateListed,
+                    Description = listing.Description
+                };
+
+                return CreatedAtAction(nameof(GetById), new { id = listing.ListingId }, response);
+            }
+            catch (FormatException ex)
             {
-                ListingId = listing.ListingId,
-                FarmerId = listing.FarmerId,
-                ProductName = listing.ProductName,
-                Category = listing.Category,
-                PricePerKg = listing.PricePerKg,
-                QuantityKg = listing.QuantityKg,
-                IsAvailable = listing.IsAvailable,
-                HarvestDate = listing.HarvestDate,
-                DateListed = listing.DateListed,
-                Description = listing.Description
-            };
-
-            return CreatedAtAction(nameof(GetById), new { id = listing.ListingId }, response);
+                return BadRequest($"Invalid format: {ex.Message}");
+            }
         }
 
         // BONUS: REVENUE
