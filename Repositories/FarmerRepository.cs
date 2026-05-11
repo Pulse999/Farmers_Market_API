@@ -94,12 +94,12 @@ namespace Farmers_Market_API.Repositories
 
         public void Add(Farmer item)
         {
-            throw new NotImplementedException();
+            Create(item);
         }
 
         public Farmer? GetById(int id)
         {
-            throw new NotImplementedException();
+            return GetFarmerById(id);
         }
     }
 }

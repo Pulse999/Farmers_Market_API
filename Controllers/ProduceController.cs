@@ -176,5 +176,68 @@ namespace Farmers_Market_API.Controllers
                 return NotFound(ex.Message);
             }
         }
+
+        // Put 
+        [HttpPut("{id}")]
+        public ActionResult Update(int id, [FromBody] ProduceListing updatedListing)
+        {
+            var existing = _repo.GetById(id);
+
+            if (existing == null)
+                return NotFound("Listing not found.");
+
+            if (updatedListing.PricePerKg <= 0)
+                return BadRequest("Price must be greater than 0.");
+
+            if (updatedListing.QuantityKg < 0)
+                return BadRequest("Quantity cannot be negative.");
+
+            existing.PricePerKg = updatedListing.PricePerKg;
+            existing.QuantityKg = updatedListing.QuantityKg;
+
+            return Ok(existing);
+        }
+
+        // DELETE endpoint
+        [HttpDelete("{id}")]
+        public ActionResult Delete(int id)
+        {
+            var success = _repo.SoftDelete(id);
+
+            if (!success)
+                return NotFound("Listing not found.");
+
+            return Ok();
+        }
+
+        // price filter endpoint
+        [HttpGet("filter/price")]
+        public ActionResult<List<ProduceListingResponseDto>> GetByPriceRange(
+    [FromQuery] double minPrice,
+    [FromQuery] double maxPrice)
+        {
+            if (minPrice < 0 || maxPrice < 0)
+                return BadRequest("Prices cannot be negative.");
+
+            if (minPrice > maxPrice)
+                return BadRequest("minPrice cannot be greater than maxPrice.");
+
+            var listings = _repo.GetByPriceRange(minPrice, maxPrice)
+                .Select(l => new ProduceListingResponseDto
+                {
+                    ListingId = l.ListingId,
+                    FarmerId = l.FarmerId,
+                    ProductName = l.ProductName,
+                    Category = l.Category,
+                    PricePerKg = l.PricePerKg,
+                    QuantityKg = l.QuantityKg,
+                    IsAvailable = l.IsAvailable,
+                    HarvestDate = l.HarvestDate,
+                    DateListed = l.DateListed,
+                    Description = l.Description
+                }).ToList();
+
+            return Ok(listings);
+        }
     }
 }
